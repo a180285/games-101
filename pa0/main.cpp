@@ -3,6 +3,8 @@
 #include<eigen3/Eigen/Dense>
 #include<iostream>
 
+using namespace std;
+
 int main(){
 
     // Basic Example of cpp
@@ -40,9 +42,17 @@ int main(){
     std::cout << "Example of output \n";
     std::cout << i << std::endl;
     // matrix add i + j
+    cout << j << endl;
+    cout << "i + j" << endl;
+    std::cout << (i + j) << std::endl;
     // matrix scalar multiply i * 2.0
+    cout << "scalar multiply i * 2.0" << endl;
+    cout << i * 2.0 << endl;
     // matrix multiply i * j
+    cout << "i * j" << endl;
+    cout << i * j << endl;
     // matrix multiply vector i * v
-
+    cout << "i * v" << endl;
+    cout << i * v << endl;
     return 0;
 }
