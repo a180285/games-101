@@ -67,6 +67,8 @@ namespace rst
         void set_projection(const Eigen::Matrix4f& p);
 
         void set_pixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color);
+        void set_msaa_pixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color);
+        const Eigen::Vector3f& get_msaa_pixel(int x, int y);
 
         void clear(Buffers buff);
 
@@ -78,7 +80,8 @@ namespace rst
         void draw_line(Eigen::Vector3f begin, Eigen::Vector3f end);
 
         void rasterize_triangle(const Triangle& t);
-
+        void msaa_triangle(const Triangle& t);
+        void final_msaa();
         // VERTEX SHADER -> MVP -> Clipping -> /.W -> VIEWPORT -> DRAWLINE/DRAWTRI -> FRAGSHADER
 
     private:
@@ -91,8 +94,11 @@ namespace rst
         std::map<int, std::vector<Eigen::Vector3f>> col_buf;
 
         std::vector<Eigen::Vector3f> frame_buf;
-
         std::vector<float> depth_buf;
+
+        std::vector<Eigen::Vector3f> msaa_frame_buf;
+        std::vector<float> msaa_depth_buf;
+
         int get_index(int x, int y);
 
         int width, height;
