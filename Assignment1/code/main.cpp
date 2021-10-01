@@ -5,27 +5,52 @@
 #include <opencv2/opencv.hpp>
 
 constexpr double MY_PI = 3.1415926;
+using namespace std;
+const bool debug = false;
 
 Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
 {
     Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
 
     Eigen::Matrix4f translate;
-    translate << 1, 0, 0, -eye_pos[0], 0, 1, 0, -eye_pos[1], 0, 0, 1,
-        -eye_pos[2], 0, 0, 0, 1;
+    translate << 
+        1, 0, 0, -eye_pos[0], 
+        0, 1, 0, -eye_pos[1], 
+        0, 0, 1, -eye_pos[2], 
+        0, 0, 0, 1;
 
     view = translate * view;
+    if (debug) {
+        cout << "eye_pos: \n" << eye_pos << endl;
+        cout << "view Matrix:" << endl;
+        cout << view << endl;
+    }
 
     return view;
+}
+
+Eigen::Matrix4f get_rotation(Vector3f axis, float angle)
+{
+    // 
 }
 
 Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
     Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
 
-    // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
+    double rotation = rotation_angle / 180.0 * M_PI;
+    model <<  
+        cos(rotation), -sin(rotation), 0, 0,
+        sin(rotation), cos(rotation), 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1;
+    if (debug) {
+        cout << "rotate by Z: " << rotation_angle << endl;
+        cout << "Model Matrix:" << endl;
+        cout << model << endl;
+    }
 
     return model;
 }
@@ -33,13 +58,55 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
                                       float zNear, float zFar)
 {
-    // Students will implement this function
+    // sample input 45, 1, 0.1, 50
+
+    if (debug) {
+        cout << "get_projection_matrix" << endl;
+        cout << "eye_fov: " << eye_fov << endl;
+        cout << "aspect_ratio: " << aspect_ratio << endl;
+        cout << "zNear: " << zNear << endl;
+        cout << "zFar: " << zFar << endl;
+    }
+
+    zNear *= -1;
+    zFar *= -1;
+
+    float height = 2 * zNear * tan(eye_fov / 2 / 180 * M_PI);
+    float width = height * aspect_ratio;
+    float zDepth = abs(zFar - zNear);
 
     Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
 
-    // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
+    Eigen::Matrix4f culling;
+
+    culling << 
+        zNear, 0, 0, 0, 
+        0, zNear, 0, 0, 
+        0, 0, zNear + zFar, - zNear * zFar, 
+        0, 0, 1, 0;
+    if (debug) {
+        cout << "culling Matrix: \n" << culling << endl;
+        Vector4f p(0, 0, zNear, 1);
+        cout << "test culling : " << culling * p << endl;
+    }
+
+    Eigen::Matrix4f translate;
+    translate << 
+        1, 0, 0, 0, 
+        0, 1, 0, 0, 
+        0, 0, 1, (zNear + zFar) / 2, 
+        0, 0, 0, 1;
+
+    Eigen::Matrix4f scale;
+    scale << 
+        1 / width, 0, 0, 0,
+        0, 1 / height, 0, 0,
+        0, 0, 1 / zDepth, 0,
+        0, 0, 0, 1;
+
+    projection = scale * translate * culling * projection;
 
     return projection;
 }
@@ -56,8 +123,6 @@ int main(int argc, const char** argv)
         if (argc == 4) {
             filename = std::string(argv[3]);
         }
-        else
-            return 0;
     }
 
     rst::rasterizer r(700, 700);
